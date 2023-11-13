@@ -91,8 +91,6 @@ export class PilaInstruccion extends Array<Instruccion>{
     }
 
     private filtroIns(instruccion:Instruccion){
-        console.log(instruccion);
-        
         if(instruccion.tipo=="If"){
             this.auxIf.push(instruccion as If);
         }else if(instruccion.tipo=="ElseIf"){

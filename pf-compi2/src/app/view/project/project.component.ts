@@ -20,14 +20,12 @@ export class ProjectComponent implements OnInit {
     ) {  console.log('t a odts') }
 
   ngOnInit(): void {
-    console.log('t a fst')
     this.actualizarProyectos();
   }
 
   private actualizarProyectos():void{
     this.servicioProyecto.getProyectos().subscribe( data => {
       this.proyectos = data;
-      console.log('proy --fst ', this.proyectos)
     },
     err => {
       console.log('error', err)

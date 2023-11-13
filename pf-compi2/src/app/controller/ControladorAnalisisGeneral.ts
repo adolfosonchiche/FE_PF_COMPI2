@@ -1,7 +1,6 @@
 import { ConstructorMensajeError } from 'src/resources/util/ConstuctorMensajeError';
 import { FiltroTipoDatoJava } from 'src/resources/util/FiltroTipoDatoJava';
 import * as AnalizadorJava from '../../resources/analizador/java/Java';
-import * as AnalizadorPrograma from '../../resources/analizador/programa/Programa';
 import { FiltroTipoDatoPrograma } from 'src/resources/util/FiltroTipoDatoPrograma';
 import { ControladorInstrucciones } from './ControladorInstrucciones';
 import { PilaInstruccion } from 'src/model/instruccion/structure/PilaInstruccion';
@@ -13,18 +12,13 @@ export class ControladorAnalisisGeneral {
 
   private constructorRespuesta: ConstructorMensajeError;
   private filtroTipoDatoJava: FiltroTipoDatoJava;
-  private filtroTipoDatoPrograma: FiltroTipoDatoPrograma;
   private controladorInstrucciones: ControladorInstrucciones;
-  private importador: Importador;
 
   public constructor() {
     this.constructorRespuesta = new ConstructorMensajeError();
     this.filtroTipoDatoJava = new FiltroTipoDatoJava();
-    this.filtroTipoDatoPrograma = new FiltroTipoDatoPrograma();
     this.controladorInstrucciones = new ControladorInstrucciones();
-    this.importador = new Importador();
     this.inicializarYYJava();
-    this.inicializarYYPrograma();
   }
 
   public analizar(separador: any, pila: PilaInstruccion, pilaJava: PilaInstruccion): string {
@@ -40,54 +34,24 @@ export class ControladorAnalisisGeneral {
       }
     }
 
-    //analizando codigo programa
-    if (this.existeCodigo(separador.getCodigoPrograma())) {
-      AnalizadorPrograma.reset(AnalizadorPrograma.parser.yy);
-      AnalizadorPrograma.parser.yy.PILA_INS = pila;
-      AnalizadorPrograma.parse(separador.getCodigoPrograma());
-      if (AnalizadorPrograma.getErrores().length > 0) {
-        respuesta += this.constructorRespuesta.construirMensaje(AnalizadorPrograma.getErrores(), separador.getInicioPrograma());
-      }
-    }
-
     return respuesta;
   }
 
-  public analizarCodigoPrograma(separador: any, pila: PilaInstruccion, archivosJava: Array<ArchivoInstrucciones>, archivosPython: Array<ArchivoInstrucciones>, idArchivoActual: string): string {
-
-    let respuesta: string = "";
-
-    //analizando codigo programa
-    if (this.existeCodigo(separador.getCodigoPrograma())) {
-      AnalizadorPrograma.reset(AnalizadorPrograma.parser.yy);
-      AnalizadorPrograma.parser.yy.PILA_INS = pila;
-      AnalizadorPrograma.parser.yy.ARCHIVOS_JAVA = archivosJava;
-      AnalizadorPrograma.parser.yy.ARCHIVOS_PYTHON = archivosPython;
-      AnalizadorPrograma.parser.yy.arch_actual = idArchivoActual;
-      AnalizadorPrograma.parser.yy.importador = this.importador;
-      AnalizadorPrograma.parse(separador.getCodigoPrograma());
-      if (AnalizadorPrograma.getErrores().length > 0) {
-        respuesta += this.constructorRespuesta.construirMensaje(AnalizadorPrograma.getErrores(), separador.getInicioPrograma());
-      }
-    }
-
-    return respuesta;
-  }
 
   public analizarCodigoJava(separador: any, pila: PilaInstruccion): string {
-    console.log('analizando codigo java')
     let respuesta: string = "";
 
     //analizando codigo java
+    console.log('vvvv ffff aaaa sssssseparador')
+    console.log(separador.getCodigoJava());
     if (this.existeCodigo(separador.getCodigoJava())) {
-      console.log('iniciando el parser')
       AnalizadorJava.reset();
       AnalizadorJava.parser.yy.PILA_INS = pila;
-      console.log('vvvv ffff aaaa ssssss')
-      console.log(separador.getCodigoJava());
+
+
       AnalizadorJava.parse(separador.getCodigoJava());
+
       if (AnalizadorJava.getErrores().length > 0) {
-        console.log('iniciando enviando elparametro')
         respuesta += this.constructorRespuesta.construirMensaje(AnalizadorJava.getErrores(), separador.getInicioJava());
       }
     }
@@ -160,53 +124,6 @@ export class ControladorAnalisisGeneral {
     yy.nuevaClase = this.controladorInstrucciones.nuevaClase;
   }
 
-  private inicializarYYPrograma() {
-    let yy = AnalizadorPrograma.parser.yy;
-    yy.INT = this.filtroTipoDatoPrograma.INT;
-    yy.FLOAT = this.filtroTipoDatoPrograma.FLOAT;
-    yy.CHAR = this.filtroTipoDatoPrograma.CHAR;
-    yy.BOOLEAN = this.filtroTipoDatoPrograma.BOOLEAN;
 
-    yy.ID = this.filtroTipoDatoPrograma.ID;
-
-    yy.VOID = this.filtroTipoDatoPrograma.VOID;
-
-    yy.GLOBAL = this.filtroTipoDatoPrograma.GLOBAL;
-
-    yy.METODO = this.filtroTipoDatoPrograma.METODO;
-    yy.VARIABLE = this.filtroTipoDatoPrograma.VARIABLE;
-    yy.CLASE = this.filtroTipoDatoPrograma.CLASE;
-    yy.PARAMETRO = this.filtroTipoDatoPrograma.PARAMETRO;
-    yy.CONSTANTE = this.filtroTipoDatoPrograma.CONSTANTE;
-
-    yy.ASIGNACION = this.filtroTipoDatoPrograma.ASIGNACION;
-
-    yy.POTENCIA = this.filtroTipoDatoPrograma.POTENCIA;
-    yy.MODULO = this.filtroTipoDatoPrograma.MODULO;
-    yy.DIVISION = this.filtroTipoDatoPrograma.DIVISION;
-    yy.MULTIPLICACION = this.filtroTipoDatoPrograma.MULTIPLICACION;
-    yy.SUMA = this.filtroTipoDatoPrograma.SUMA;
-    yy.RESTA = this.filtroTipoDatoPrograma.RESTA;
-    yy.IGUAL = this.filtroTipoDatoPrograma.IGUAL;
-    yy.NO_IGUAL = this.filtroTipoDatoPrograma.NO_IGUAL;
-    yy.MAYOR = this.filtroTipoDatoPrograma.MAYOR;
-    yy.MENOR = this.filtroTipoDatoPrograma.MENOR;
-    yy.MAYOR_IGUAL = this.filtroTipoDatoPrograma.MAYOR_IGUAL;
-    yy.MENOR_IGUAL = this.filtroTipoDatoPrograma.MENOR_IGUAL;
-    yy.AND = this.filtroTipoDatoPrograma.AND;
-    yy.OR = this.filtroTipoDatoPrograma.OR;
-    yy.XOR = this.filtroTipoDatoPrograma.XOR;
-    yy.PUBLIC = this.filtroTipoDatoPrograma.PUBLIC;
-    yy.PRIVATE = this.filtroTipoDatoPrograma.PRIVATE;
-    yy.DEFAULT = this.filtroTipoDatoPrograma.DEFAULT;
-
-    yy.filtrarOperacion = this.filtroTipoDatoPrograma.filtrarOperacion;
-
-    this.agregarMetodos(yy);
-  }
-
-  public getInstrucciones(): Array<any> {
-    return AnalizadorPrograma.getInstrucciones();
-  }
 
 }

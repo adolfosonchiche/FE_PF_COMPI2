@@ -63,7 +63,6 @@ export class HomeIdeComponent implements OnInit, AfterViewInit {
     if (proy != null && proy != "null") {
       servicioProyecto.getProyecto(proy).subscribe(data => {
         this.proyecto = data;
-        console.log('fst ', this.proyecto)
         this.compilarDeshabilitado = false;
       });
       localStorage.setItem('proyecto', 'null');
@@ -84,7 +83,6 @@ export class HomeIdeComponent implements OnInit, AfterViewInit {
 
   //editor de codigo
   ngAfterViewInit() {
-    console.log('hola fa')
     ace.config.set("fontSize", "25px");
     ace.config.set('basePath', 'https://unpkg.com/ace-builds@1.4.12/src-noconflict');
 
@@ -153,11 +151,12 @@ export class HomeIdeComponent implements OnInit, AfterViewInit {
 
   //parsear(){}
   public parsear() {
+    this.txtConsola = 'compilando';
+    this.codigo3d = '';
     this.guardarProyectoSinAviso();
     this.listaInstruccion = new ListaInstruccion();
     console.clear();
-    //const aceEditor = ace.edit(this.editor.nativeElement);
-    //this.txtConsola = this.analizador.analizar(aceEditor.getValue(),this.pilaInstruccion,this.pilaInstruccionJava);
+
     if (this.proyecto) {
       this.txtConsola = this.analizador.nuevoanalizar(this.proyecto, this.listaInstruccion);
       if (this.txtConsola == "Compilación exitosa.") {
@@ -174,7 +173,6 @@ export class HomeIdeComponent implements OnInit, AfterViewInit {
         this.cod3dDeshabilitado = true;
       }
     }
-    console.log(this.listaInstruccion);
   }
 
 
@@ -207,11 +205,8 @@ export class HomeIdeComponent implements OnInit, AfterViewInit {
   }
 
   public crearArchivo(): void {
-    console.log('creando archivo')
-    console.log(this.idArchivo)
     if (this.idValido(this.idArchivo) && this.proyecto) {
       console.log('creando archivo dentro del proyecto')
-      console.log(this.proyecto)
       this.gestionadorPaquete.nuevoArchivo(this.idArchivo, this.proyecto, "");
       this.idArchivo = "";
     } else {

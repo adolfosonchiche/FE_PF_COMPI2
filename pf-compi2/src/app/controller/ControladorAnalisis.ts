@@ -18,7 +18,7 @@ export class ControladorAnalisis{
         this.recuperadorArchivos = new RecuperadorArchivos();
     }
 
-    public analizar(codigo:String,pila:PilaInstruccion,pilaJava:PilaInstruccion):String{
+    public analizar(codigo:String, pila:PilaInstruccion, pilaJava:PilaInstruccion):String{
 
         let resultado:String = "codigos:\n";
         Separador.reset();
@@ -27,25 +27,19 @@ export class ControladorAnalisis{
 
     }
 
-    public getInstrucciones():Array<any>{
-        return this.analizadorGeneral.getInstrucciones();
-    }
-
-    public nuevoanalizar(proyecto:Proyecto,instruccionesFinales:ListaInstruccion):string{
+    public nuevoanalizar(proyecto:Proyecto, instruccionesFinales:ListaInstruccion):string{
         let archivosJava:ListaArchivoInstrucciones = new ListaArchivoInstrucciones();
-        let archivosPython:ListaArchivoInstrucciones = new ListaArchivoInstrucciones();
-
 
         let resultado:string = "";
         let archivos:Array<Archivo> = this.recuperadorArchivos.recuperar(proyecto);
 
-        console.log('tt aa fst')
-        console.log(archivos)
+
         for(let i=0;i<archivos.length;i++){
-          console.log('te aaaaaaa ,  ,, , nnnnn ffffsssssttt')
+          console.log('tt aa fst ...-->' + i)
             resultado += "";
+            const code = '%' + '%'+ 'JAVA \n\n ' + archivos[i].codigo;
             Separador.reset();
-            Separador.parse(archivos[i].codigo);
+            Separador.parse(code);
 
             //let txt = this.analizadorGeneral.analizar(Separador,pila,pilaJava);
             let archInsJava:ArchivoInstrucciones = new ArchivoInstrucciones(archivos[i].id);
@@ -54,9 +48,9 @@ export class ControladorAnalisis{
             if(archInsJava.getInstrucciones().length){
                 archivosJava.push(archInsJava);
             }
-            if(instruccionesFinales.length==0){
+            //if(instruccionesFinales.length==0){
               instruccionesFinales.push.apply(instruccionesFinales,archInsJava.getInstrucciones());
-            }
+            //}
 
             if(txt!=""){
                 resultado += "Archivo: "+archivos[i].id+"\n";
@@ -64,26 +58,6 @@ export class ControladorAnalisis{
             }
         }
 
-
-
-        /*for(let i=0;i<archivos.length;i++){
-            resultado += "";
-            Separador.reset();
-            Separador.parse(archivos[i].codigo);
-
-            let archInsPrograma:ArchivoInstrucciones = new ArchivoInstrucciones(archivos[i].id);
-            let txt = this.analizadorGeneral.analizarCodigoPrograma(Separador,archInsPrograma.getPila(),archivosJava,archivosPython,archivos[i].id);
-            if(archInsPrograma.getInstrucciones().length){
-                if(instruccionesFinales.length==0){
-                    instruccionesFinales.push.apply(instruccionesFinales,archInsPrograma.getInstrucciones());
-                }
-            }
-
-            if(txt!=""){
-                resultado += "Archivo: "+archivos[i].id+"\n";
-                resultado += txt;
-            }
-        }*/
 
         if(resultado==""){
             return "Compilación exitosa.";
