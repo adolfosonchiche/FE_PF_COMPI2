@@ -114,11 +114,9 @@
 
     exports.reset = function(){
         errores.splice(0, errores.length);
-        //-w-tablaDeSimbolos.splice(0, tablaDeSimbolos.length);
         tablasDeSimbolos.splice(0, tablasDeSimbolos.length);
         let tablaGlobal = [];
         tablasDeSimbolos.push(tablaGlobal);
-        //-w-ambitoActual.splice(0, ambitoActual.length);
         ids.splice(0, ids.length);
         simbolosParametros.splice(0, simbolosParametros.length);
         cadParametros = "";
@@ -212,11 +210,8 @@
         }
     }
 
-    //-w-function existeSimbolo(id,ambito,rol){
     function existeSimbolo(id,rol){
-        //-w-for(let simbolo in tablaDeSimbolos){
         for(let simbolo in getAmbitoActual()){
-            //-w-if(tablaDeSimbolos[simbolo].rol==rol && tablaDeSimbolos[simbolo].id==id && ambito==tablaDeSimbolos[simbolo].ambito){
             if(getAmbitoActual()[simbolo].rol==rol && getAmbitoActual()[simbolo].id==id){
                 return true;
             }
@@ -236,10 +231,6 @@
     }
 
     function obtenerSimbolo(id){
-        //-w-for (let i=tablaDeSimbolos.length - 1; i >= 0; i--) {
-        //-w-for (let i=tablaDeSimbolos.length - 1; i >= 0; i--) {
-            //-w-if(id==tablaDeSimbolos[i].id){
-                //-w-return tablaDeSimbolos[i];
         for (let i=getAmbitoActual().length - 1; i >= 0; i--) {
             if(id==getAmbitoActual()[i].id){
                 return getAmbitoActual()[i];
@@ -249,11 +240,6 @@
     }
 
     function obtenerUltimoMetodo(yy){
-        /*-w-for (let i=tablaDeSimbolos.length - 1; i >= 0; i--) {
-            if(tablaDeSimbolos[i].rol == yy.METODO){
-                return tablaDeSimbolos[i];
-            }
-        }*/
         console.log(tablasDeSimbolos);
         for (let i=getAmbitoActual().length - 1; i >= 0; i--) {
             if(getAmbitoActual()[i].rol == yy.METODO){
@@ -298,12 +284,7 @@
         while(tabla.length>0){
             let sim = tabla.pop();
             if((sim.rol==yy.VARIABLE || sim.rol==yy.PARAMETRO) && sim.id==id){
-                /*-w-let ambitos = ambitoActual.slice();
-                while(ambitos.length>0){
-                    if(sim.ambito==ambitos.pop()){
-                        return sim;
-                    }
-                }*/
+
                 return sim;
             }
         }
@@ -315,12 +296,6 @@
 
 inicial :  a1 EOF   {
                         for(const simbolo in getAmbitoActual()){
-                            console.log("-----------------");
-                            /*-w-console.log("Id: "+tablaDeSimbolos[simbolo].id);
-                            console.log("Tipo: "+tablaDeSimbolos[simbolo].tipo);
-                            console.log("Ambito: "+tablaDeSimbolos[simbolo].ambito);
-                            console.log("Visibilidad: "+tablaDeSimbolos[simbolo].visibilidad);
-                            console.log("Rol: "+tablaDeSimbolos[simbolo].rol);*/
                             console.log("Id: "+getAmbitoActual()[simbolo].id);
                             console.log("Tipo: "+getAmbitoActual()[simbolo].tipo);
                             console.log("Ambito: "+getAmbitoActual()[simbolo].ambito);
@@ -1067,8 +1042,4 @@ g3 : INT        {
                     $$ = operacion;
                 }
     ;
-
-
-//-------------------------------------------------------------------------------
-
 
