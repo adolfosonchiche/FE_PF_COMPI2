@@ -1,0 +1,288 @@
+
+<div class="row container" id>
+  <div class="col col-1">
+    <div id="pestaña">
+      <div class="contenedor-img">
+        <img src="assets/img/editor_codigo.png" title="Editor de codigo"
+          width="40px"
+          class="pestañas" (click)="imgClick(0)">
+      </div>
+      <div class="contenedor-img">
+        <img src="assets/img/c3d.png" title="Codigo tres direcciones C"
+          width="40px"
+          id="c" class="pestañas seleccionado"
+          (click)="imgClick(1)">
+      </div>
+      <div class="contenedor-img">
+        <img src="assets/img/codigo.png" title="Codigo Assembler"
+          width="40px" id="asm" class="pestañas"
+          (click)="imgClick(2)">
+      </div>
+      <div class="contenedor-img">
+        <img src="assets/img/descargar.png" title="Descargar" width="40px"
+          id="reporte" class="pestañas"
+          (click)="imgClick(3)">
+      </div>
+      <div class="contenedor-img">
+        <img src="assets/img/bug.png" title="Errores" width="40px"
+          id="errores" class="pestañas"
+          (click)="imgClick(4)">
+      </div>
+    </div>
+  </div>
+
+  <div id="area-editor" class="col" [hidden]="selectedOption == 1">
+    <div id="arbol">
+      <div class>
+        <span>OPCIONES</span>
+      </div>
+
+      <div class="row mb-3">
+        <div class="row">
+          <div class="col">
+            <img src="assets/img/abrir.png" alt="Guardar" width="35em"
+              height="35em" title="Abrir proyecto" class="pestañas"
+              (click)="mostrarProyectos()">
+          </div>
+
+          <div class="col">
+            <img src="assets/img/nuevo_proy.png" alt="Guardar-como" width="35em"
+              height="35em" title="Crear nuevo Proyecto" class="pestañas"
+              data-bs-toggle="modal"
+              data-bs-target="#modal-nuevo-proyecto">
+          </div>
+        </div>
+        <span></span><br />
+
+        <div class="row">
+          <div class="col">
+            <img src="assets/img/guardar.png" alt="Compilar" width="35em"
+              height="35em" title="Guardar proyecto" class="pestañas"
+              (click)="guardarProyecto()">
+          </div>
+          <div class="col">
+            <img src="assets/img/paquete.png" alt="Compilar" width="35em"
+              height="35em" title="Crear nuevo paquete" class="pestañas"
+              data-bs-toggle="modal" data-bs-target="#modal-nuevo-paquete">
+          </div>
+        </div>
+        <span></span> <br />
+
+        <div class="row">
+          <div class="col">
+            <img src="assets/img/agregar.png" alt="Guardar" width="35em"
+              height="35em" title="Nuevo Archivo" class="pestañas"
+              data-bs-toggle="modal" data-bs-target="#modal-nuevo-archivo">
+          </div>
+
+          <div class="col">
+            <img src="assets/img/cerrar2.png" alt="Guardar-como" width="35em"
+              height="35em" title="Cerrar proyecto" class="pestañas"
+              (click)="cerrarProyecto()">
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div>
+        <span>PROYECTO</span>
+
+        <div class="row" style="margin-top: 25px;">
+          <div>
+            <ul>
+              <li *ngIf="proyecto!=null" class="carpeta"
+                [id]="proyecto.nombre"
+                data-jstree='{"icon":"assets/img/proy_java.png"}'>
+                <a (click)="expandir()" class="expand link-secondary">{{proyecto.nombre}}</a>
+                <ul>
+                  <ng-container
+                    *ngTemplateOutlet="Recursion; context:{ paquetes: proyecto.paquetePrincipal.paquetes, archivos:proyecto.paquetePrincipal.archivos}"></ng-container>
+                  <ng-template #Recursion let-paquetes="paquetes"
+                    let-archivos="archivos">
+                    <li class="carpeta" *ngFor="let paquete of paquetes"
+                      id="{{paquete.id}}">
+                      <a (click)="expandir()"
+                        class="expand link-secondary">{{paquete.nombre}}</a>
+                      <ul
+                        *ngIf="paquete.paquetes.length > 0 || paquete.archivos.length > 0">
+                        <ng-container
+                          *ngTemplateOutlet="Recursion; context:{ paquetes: paquete.paquetes, archivos: paquete.archivos }"></ng-container>
+                      </ul>
+                    </li>
+                    <li class="file" *ngFor="let archivo of archivos"
+                      id="{{archivo.id}}">
+                      <a (click)="actualizarCodigoEditor(archivo.id)"
+                        class=" link-secondary">{{archivo.nombre}}</a>
+                    </li>
+                  </ng-template>
+                </ul>
+                {{expandir()}}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="menu-option">
+        <div id="row">
+          <label for="name-file">Archivo seleccionado:</label>
+          <input *ngIf="archivoActual==null" placeholder type="text"
+            disabled="true" />
+          <input *ngIf="archivoActual!=null" type="text"
+            [(ngModel)]="archivoActual.nombre" disabled="true" />
+          <img src="assets/img/guardar.png" alt="Guardar" width="45em"
+            class="pestañas"
+            height="45em" title="Guardar">
+
+          <img src="assets/img/guardar_como.png" alt="Guardar-como" width="45em"
+            height="45em" class="pestañas"
+            title="Guardar como">
+          <img src="assets/img/compilar.png" alt="Compilar" width="45em"
+            height="45em" class="pestañas"
+            title="Ejecutar proyecto" (click)="parsear()">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row" style="margin-top: 5px;">
+          <div class="col-12">
+            <div class="app-ace-editor" #editor
+              style="width: 115%;height:450px;">{{codigoPrincipal}}</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-3">
+            <h5 style="text-align: right;">Linea: {{getLinea()}}</h5>
+          </div>
+          <div class="col-1"></div>
+          <div class="col-3">
+            <h5>Columna: {{getColumna()}}</h5>
+          </div>
+          <div class="col-1"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 20px;">
+        <div class="col-12">
+          <div class="container">
+            <h6>
+              Consola
+            </h6>
+            <div class="col-12">
+              <textarea class="form-control"
+                rows="10" cols="35" readonly
+                style="height: 100%; width: 100%;">{{getTxtConsola()}}</textarea>
+              <div class="row">
+                <span>---</span>
+              </div>
+            </div>
+            <div class="row"></div>
+          </div>
+        </div>
+        <br />
+      </div>
+    </div>
+
+  </div>
+
+  <div [hidden]="selectedOption == 0" class="col">
+    <h5>Codigo 3D</h5>
+    <div class="tab-pane">
+      <textarea readonly class="form-control font-monospace" id="cod3d">{{codigo3d}}</textarea>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="modal fade" id="modal-nuevo-archivo">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo archivo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" [(ngModel)]="idArchivo"
+            autocomplete="off" pattern="[0-9]+">
+          <label for="floatingInput">Ingrese el nombre del archivo:</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+          (click)="crearArchivo();">Crear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-nuevo-paquete">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo paquete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" [(ngModel)]="idPaquete"
+            autocomplete="off">
+          <label for="floatingInput">Ingrese el nombre del paquete:</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+          (click)="crearPaquete();">Crear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-nuevo-proyecto">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo proyecto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" [(ngModel)]="nombreProyecto"
+            autocomplete="off">
+          <label for="floatingInput">Ingrese el nombre del proyecto:</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+          (click)="crearProyecto();">Crear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-info" #modalinfo>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Aviso!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <h5>{{textoInfo}}</h5>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<button id="abrirModalInfo" [hidden]="true" type="button"
+  class="btn btn-danger btnw" data-bs-toggle="modal"
+  data-bs-target="#modal-info">Nuevo Paquete</button>

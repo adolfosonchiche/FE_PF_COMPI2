@@ -1,0 +1,23 @@
+ul li ul{
+  display: none;
+}
+
+li.carpeta {
+  list-style-image: url('/assets/img/proy_java.png');
+}
+
+li.file {
+  list-style-image: url('/assets/img/archivo.png');
+}
+
+.btnw {
+  width: 95%;
+}
+
+#cod3d {
+  height: 500px;
+  margin-top: 25px;
+  font-size: 125%;
+}
+
+
