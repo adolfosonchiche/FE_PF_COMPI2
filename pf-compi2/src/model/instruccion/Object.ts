@@ -1,8 +1,8 @@
-import { Instruccion } from "../Instruccion";
+import { Instruccion } from "./Instruccion";
 
-export class Return implements Instruccion{
+export class Object implements Instruccion{
 
-    tipo:string = "Return";
+    tipo:string = "Object";
     instrucciones!:Array<Instruccion>;
 
     constructor(

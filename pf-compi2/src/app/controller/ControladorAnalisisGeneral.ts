@@ -99,6 +99,15 @@ export class ControladorAnalisisGeneral {
     yy.PUBLIC = this.filtroTipoDatoJava.PUBLIC;
     yy.PRIVATE = this.filtroTipoDatoJava.PRIVATE;
     yy.DEFAULT = this.filtroTipoDatoJava.DEFAULT;
+    /**----------- */
+    yy.PRINT = this.filtroTipoDatoJava.PRINT;
+    yy.GETTER = this.filtroTipoDatoJava.GETTER;
+    yy.SETTER = this.filtroTipoDatoJava.SETTER;
+    yy.IMPORT = this.filtroTipoDatoJava.IMPORT;
+    yy.NEW = this.filtroTipoDatoJava.NEW;
+    yy.THIS = this.filtroTipoDatoJava.THIS;
+    yy.RETURN = this.filtroTipoDatoJava.RETURN;
+    yy.OBJECT = this.filtroTipoDatoJava.OBJECT;
 
     yy.filtrarOperacion = this.filtroTipoDatoJava.filtrarOperacion;
 
@@ -122,6 +131,9 @@ export class ControladorAnalisisGeneral {
     yy.nuevoDefault = this.controladorInstrucciones.nuevoDefault;
     yy.nuevoBreak = this.controladorInstrucciones.nuevoBreak;
     yy.nuevaClase = this.controladorInstrucciones.nuevaClase;
+    yy.nuevaPrint = this.controladorInstrucciones.nuevaPrint;
+    yy.nuevaReturn = this.controladorInstrucciones.nuevaReturn;
+    yy.nuevaObject = this.controladorInstrucciones.nuevaObject;
   }
 
 

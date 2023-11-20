@@ -52,7 +52,8 @@ export class PilaInstruccion extends Array<Instruccion>{
                     instruccion.tipo=="DoWhile" ||
                     instruccion.tipo=="Switch" ||
                     instruccion.tipo=="Case" ||
-                    instruccion.tipo=="Default"
+                    instruccion.tipo=="Default" ||
+                    instruccion.tipo == "Print"
                 ){
                     this.push(instruccion);
                 }

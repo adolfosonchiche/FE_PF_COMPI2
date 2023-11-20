@@ -24,11 +24,12 @@
 "double"                        return 'PR_DOUBLE'
 "char"                          return 'PR_CHAR'
 "boolean"                       return 'PR_BOOLEAN'
-"string"                        return 'PR_STRING'
+"String"                        return 'PR_STRING'
 "main"                          return 'PR_MAIN'
 "import"                        return 'PR_IMPORT'
 "@Getter"                       return 'PR_GETTER'
 "@Setter"                       return 'PR_SETTER'
+"new"                           return 'PR_NEW'
 
 //  instrucciones y ciclos
 "if"                            return 'PR_IF'
@@ -40,8 +41,12 @@
 "while"                         return 'PR_WHILE'
 "default"                       return 'PR_DEFAULT'
 "break"                         return 'PR_BREAK'
+"System"                        return "PR_SYSTEM"
+"out"                           return "PR_OUT"
 "println"                       return 'PR_PRINTLN'
 "print"                         return 'PR_PRINT'
+"this"                          return 'PR_THIS'
+"return"                        return 'PR_RETURN'
 
 
 //simbolos
@@ -73,6 +78,7 @@
 ":"                             return 'DOS_PUNTOS'
 ","                             return 'COMA'
 "="                             return 'ASIGNACION'
+"."                             return 'PUNTO'
 
 [a-zA-Z]+[a-zA-Z0-9_]*          return 'ID'
 
@@ -107,6 +113,7 @@
     let cadParametros = "";
     let ambitoClase = true;
     let tipoDatoSwtich = "";
+    let operacion;
 
     exports.getErrores = function (){
         return errores;
@@ -156,7 +163,7 @@
                 //Analizar tipo de resultado
                 let tipoResultado = yy.filtrarOperacion($1.tipoResultado,$2.tipoResultado,$2.operacionPendiente);
                 if(tipoResultado!=null){
-                    const operacion = new Object();
+                    operacion = new Object();
                     operacion.tipoResultado = tipoResultado;
                     operacion.operacionPendiente = $1;
 
@@ -178,7 +185,7 @@
     function produccionPrima(yy,$1,$2,$3,linea,columna){
         try{
             if($3==null){
-                const operacion = new Object();
+                operacion = new Object();
                 operacion.tipoResultado = $2.tipoResultado;
                 operacion.operacionPendiente = $1;
 
@@ -283,7 +290,7 @@
         let tabla = getAmbitoActual().slice();
         while(tabla.length>0){
             let sim = tabla.pop();
-            if((sim.rol==yy.VARIABLE || sim.rol==yy.PARAMETRO) && sim.id==id){
+            if((sim.rol==yy.VARIABLE || sim.rol==yy.PARAMETRO || sim.rol==yy.OBJECT) && sim.id==id){
 
                 return sim;
             }
@@ -325,7 +332,7 @@ a1 : declaracion_clase
 
 //DECLARACION DE CLASE ---------------------------------------------------------------
 
-declaracion_clase : declaracion_clase_p LLAVE_A instrucciones_clase LLAVE_C {
+declaracion_clase :  declaracion_clase_p LLAVE_A instrucciones_clase LLAVE_C {
         //-w-ambitoActual.pop();
         cerrarAmbito();
         yy.PILA_INS.sacar();
@@ -338,15 +345,27 @@ declaracion_clase : declaracion_clase_p LLAVE_A instrucciones_clase LLAVE_C {
     | err
     ;
 
-declaracion_clase_p : PR_PUBLIC PR_CLASS ID {
-            if(existeClase($3,yy)){
-                errorSemantico("La clase "+$3+" ya ha sido declarada.",this._$.first_line,this._$.first_column);
+//--import paquetes---------------------
+import_clase : /*ignore*/
+;
+
+// ---  etiquetas
+etiquetas_clase : PR_GETTER
+  | PR_SETTER
+  | PR_GETTER  PR_SETTER
+  | PR_SETTER PR_GETTER
+  | /*ignoramos*/
+;
+
+declaracion_clase_p : etiquetas_clase PR_PUBLIC PR_CLASS ID {
+            if(existeClase($4,yy)){
+                errorSemantico("La clase "+$4+" ya ha sido declarada.",this._$.first_line,this._$.first_column);
             }
-            agregarSimbolo($3,"","",yy.PUBLIC,yy.CLASE);
+            agregarSimbolo($4,"","",yy.PUBLIC,yy.CLASE);
             nuevoAmbito();
-            yy.PILA_INS.apilar(yy.nuevaClase($3.toString()));
+            yy.PILA_INS.apilar(yy.nuevaClase($4.toString()));
         }
-        | PR_CLASS ID {
+        | etiquetas_clase PR_CLASS ID {
             if(existeClase($3,yy)){
                 errorSemantico("La clase "+$3+" ya ha sido declarada.",this._$.first_line,this._$.first_column);
             }
@@ -369,37 +388,8 @@ instrucciones_clase_p : declaracion_variable PUNTO_Y_COMA { yy.PILA_INS.apilar($
     | declaracion_metodo
     ;
 
-//-------------------------------------------------------------------------------------
 
-// METODO PRINCIPAL ----------------------------------------------------------------
 
-metodo_principal : metodo_principal_p /*LLAVE_A instrucciones_metodo LLAVE_C*/ {
-        cerrarAmbito();
-        ambitoClase = true;
-        yy.PILA_INS.sacar();
-    }
-    ;
-
-metodo_principal_p : PR_MAIN PARENT_A PARENT_C {
-        //nuevoAmbito();
-        //yy.PILA_INS.apilar(yy.nuevoMetodo($2.toString()));
-
-        if(existeSimbolo($1+cadParametros,yy.METODO)){
-            //-w-errorSemantico("El método "+$1+cadParametros+" ya ha sido declarado en "+ambitoActual.at(-1)+".",this._$.first_line,this._$.first_column);
-            errorSemantico("El método "+$1+cadParametros+" ya ha sido declarado.",this._$.first_line,this._$.first_column);
-        }
-        //-w-agregarSimbolo(ambitoActual.at(-1)+"_"+$1+cadParametros,"",ambitoActual.at(-1),"",yy.METODO);
-        agregarSimbolo($1+cadParametros,"","","",yy.METODO);
-        nuevoAmbito();
-
-        yy.PILA_INS.apilar(yy.nuevoMetodo($1+cadParametros));
-
-        //-w-ambitoActual.push(ambitoActual.at(-1)+"_"+$1+cadParametros);
-        ambitoClase = false;
-        cadParametros = "";
-        pushSimbolosParametros();
-    }
-    ;
 
 //INSTRUCCIONES DENTRO DE METODO--------------------------------------------------------
 
@@ -409,14 +399,36 @@ instrucciones_metodo : instrucciones_metodo_p
 
 instrucciones_metodo_p : declaracion_variable PUNTO_Y_COMA { yy.PILA_INS.apilar($1); }
     | asignacion_variable PUNTO_Y_COMA { yy.PILA_INS.apilar($1); }
+    | instruccion_return                {  yy.PILA_INS.apilar($1);  }
     | instruccion_if
     | ciclo_for
     | ciclo_while
     | ciclo_do_while
     | instruccion_switch
-    | instruccion_print
-    | instruccion_println
+    | instruccion_print                /*  {  yy.PILA_INS.apilar($1);  } */
+    | instruccion_println               /* {  yy.PILA_INS.apilar($1);  } */
     ;
+
+//-INSTRUCCIONES PARA RETURN----
+instruccion_return : PR_RETURN expresion_multiple PUNTO_Y_COMA {
+        $$ = yy.nuevaReturn($1.toString(),$2.instruccion);
+
+    }
+;
+
+//INSTRUCCIONES PRINT Y PRINTLN ------------------------------------------------------
+instruccion_print : PR_SYSTEM PUNTO PR_OUT PUNTO PR_PRINT PARENT_A expresion_multiple PARENT_C PUNTO_Y_COMA {
+        //$$ = yy.nuevaPrint($5.toString(),$7.instruccion);
+         yy.PILA_INS.apilar(yy.nuevaPrint($5.toString(),$7.instruccion));
+    }
+;
+
+instruccion_println : PR_SYSTEM PUNTO PR_OUT PUNTO PR_PRINTLN PARENT_A expresion_multiple PARENT_C PUNTO_Y_COMA {
+        //$$ = yy.nuevaPrint($5.toString(),$7.instruccion);
+        yy.PILA_INS.apilar(yy.nuevaPrint($5.toString(),$7.instruccion));
+    }
+;
+
 
 //-------------------------------------------------------------------------------------
 
@@ -428,11 +440,21 @@ declaracion_variable : visibilidad tipo ids asignacion {
                     errorSemantico("Ilegal inicio de expresión: "+$1+".",this._$.first_line,this._$.first_column);
                 }
             }
-            //declaracion y asignacion
-            if($4==null || $2 == $4.tipoResultado){
+
+              //declaracion y asignacion
+            if($4==null || $4.tipoResultado == undefined || $2 == $4.tipoResultado ){
                 while(ids.length>0){
+                   let id = ids.pop();
+                  if($4.tipoResultado == undefined) {
+                    if(existeSimbolo(id,yy.VARIABLE)){
+                        errorSemantico("La variable "+id+" ya ha sido declarada.",this._$.first_line,this._$.first_column);
+                    }else{
+                     $$ = yy.nuevaDeclaracion(id,yy.nuevaOperacion(null,null,yy.ID,$4.toString()));
+                     agregarSimbolo(id,$2,"",$1,yy.VARIABLE);
+                    }
+                  } else {
                     //asignacion de tipo correcta
-                    let id = ids.pop();
+
                     //-w-if(existeSimbolo(id,ambitoActual.at(-1),yy.VARIABLE)){
                     if(existeSimbolo(id,yy.VARIABLE)){
                         errorSemantico("La variable "+id+" ya ha sido declarada.",this._$.first_line,this._$.first_column);
@@ -444,12 +466,47 @@ declaracion_variable : visibilidad tipo ids asignacion {
                         //-w-agregarSimbolo(id,$2,ambitoActual.at(-1),$1,yy.VARIABLE);
                         agregarSimbolo(id,$2,"",$1,yy.VARIABLE);
                     }
+                  }
                 }
             }else{
                 errorSemantico("Tipo de dato requerido : "+$2+" . Obtenido: "+$4.tipoResultado+" .",this._$.first_line,this._$.first_column);
             }
+
+
+        }
+      |  ID ID ASIGNACION PR_NEW ID PARENT_A expresion_multiple PARENT_C {
+            if($2 != yy.DEFAULT){
+                if(!ambitoClase){
+                  errorSemantico("Ilegal inicio de expresión: "+$1+".",this._$.first_line,this._$.first_column);
+                }
+            }
+            //let id = ids.pop();
+            if(existeSimbolo($2,yy.OBJECT)){
+                errorSemantico("La variable "+$2+" ya ha sido declarada.",this._$.first_line,this._$.first_column);
+            }else {
+              if($7 != undefined) {
+                  yy.PILA_INS.apilar(yy.nuevaDeclaracion("param", $7.instruccion));
+              }
+              $$ = yy.nuevaDeclaracion($2,yy.nuevaOperacion(null,null,yy.ID,$5.toString()));
+              agregarSimbolo($2,$1,"",yy.DEFAULT,yy.OBJECT);
+
+            }
+            //declaracion y asignacion
+            /*
+            operacion = new Object();
+                    let sim_id_a = validarVariable($1,yy);
+                    if(sim_id_a==null){
+                        errorSemantico("No se encuentra el símbolo "+$1+" .",this._$.first_line,this._$.first_column);
+                        operacion.tipoResultado = yy.ID;
+                    }else{
+                        operacion.tipoResultado = sim_id_a.tipo;
+                    }
+                    operacion.instruccion = yy.nuevaOperacion(null,null,yy.ID,$1.toString());
+                    $$ = operacion;
+            */
         }
     ;
+
 
 ids : ids_p
     | ids_p COMA ids
@@ -458,36 +515,44 @@ ids : ids_p
 ids_p : ID { ids.push($1); }
     ;
 
+ids_object : ID { $$ = $1; }
+    ;
+
 tipo : PR_INT { $$ = yy.INT; }
     | PR_DOUBLE { $$ = yy.DOUBLE; }
     | PR_CHAR { $$ = yy.CHAR; }
     | PR_STRING { $$ = yy.STRING; }
     | PR_BOOLEAN { $$ = yy.BOOLEAN; }
+    //| ID { $$ = yy.ID; }
     ;
 
 asignacion : /*Lambda*/ { $$ = null; }
     | ASIGNACION expresion_multiple { $$ = $2; }
+    | ASIGNACION ID PUNTO ID PARENT_A expresion_multiple PARENT_C { $$ = $2 + '_' + $4; }
     ;
 
 //------------------------------------------------------------------------------------
 
 //ASIGNACION DE VARIABLES ------------------------------------------------------------
 
-asignacion_variable : ID ASIGNACION expresion_multiple {
+asignacion_variable : ID ASIGNACION asignacion_object {
         //validando id
         let simId = validarVariable($1,yy);
         if(simId==null){
             errorSemantico("No se encuentra el símbolo "+$1+" .",this._$.first_line,this._$.first_column);
         }else{
+          if($3.tipoResultado == undefined) {
+              $$ = yy.nuevaAsignacion($1.toString(),yy.nuevaOperacion(null,null,yy.ID,$3.toString()));
+          } else {
             if(simId.tipo == $3.tipoResultado){
                 //asignacion exitosa;
-                //++++++++++++++++++++++++AGREGAR EN CUADRUPLA++++++++++++++++++++++++
-                //++++++++++++++++++++++++AGREGAR EN CUADRUPLA++++++++++++++++++++++++
                 //++++++++++++++++++++++++AGREGAR EN CUADRUPLA++++++++++++++++++++++++
                 $$ = yy.nuevaAsignacion($1.toString(),$3.instruccion);
             }else{
                 errorSemantico("Tipo de dato requerido : "+simId.tipo+" . Obtenido: "+$3.tipoResultado+" .",this._$.first_line,this._$.first_column);
             }
+          }
+
         }
     }
     | ID inc_dec {
@@ -498,15 +563,36 @@ asignacion_variable : ID ASIGNACION expresion_multiple {
             if(simId_a.tipo == yy.INT || simId_a.tipo == yy.DOUBLE){
                 //asignacion exitosa;
                 //++++++++++++++++++++++++AGREGAR EN CUADRUPLA++++++++++++++++++++++++
-                //++++++++++++++++++++++++AGREGAR EN CUADRUPLA++++++++++++++++++++++++
-                //++++++++++++++++++++++++AGREGAR EN CUADRUPLA++++++++++++++++++++++++
                 $$ = yy.nuevoIncDec($1.toString(),$2);
             }else{
                 errorSemantico("Tipo de dato requerido : "+yy.INT+","+yy.DOUBLE+" . Obtenido: "+simId_a.tipo+" .",this._$.first_line,this._$.first_column);
             }
         }
     }
+     | ID PUNTO ID PARENT_A expresion_multiple PARENT_C   {
+        if($5 != undefined) {
+            yy.PILA_INS.apilar(yy.nuevaDeclaracion("param", $5.instruccion));
+        }
+        let temps = $1 + '_' + $3;
+        $$ = yy.nuevaAsignacion("",yy.nuevaOperacion(null,null,yy.ID,temps));
+      }
     ;
+
+asignacion_object : expresion_multiple  { $$ = $1;  }
+      |   PR_NEW  ID   PARENT_A expresion_multiple PARENT_C        {
+        if($4 != undefined) {
+            yy.PILA_INS.apilar(yy.nuevaDeclaracion("param", $4.instruccion));
+        }
+
+         $$ = $2;
+      }
+      | ID PUNTO ID PARENT_A expresion_multiple PARENT_C   {
+        if($5 != undefined) {
+            yy.PILA_INS.apilar(yy.nuevaDeclaracion("param", $5.instruccion));
+        }
+        $$ = $1 + '_' + $3;
+      }
+;
 
 inc_dec : INCREMENTO { $$ = yy.SUMA; }
     | DECREMENTO { $$ = yy.RESTA; }
@@ -571,6 +657,34 @@ declaracion_metodo_p_a : ID PARENT_A parametros_b_p PARENT_C {
     | metodo_principal
     ;
 
+
+// METODO PRINCIPAL ----------------------------------------------------------------
+
+
+
+metodo_principal : PR_MAIN PARENT_A PARENT_C {
+        //nuevoAmbito();
+        //yy.PILA_INS.apilar(yy.nuevoMetodo($2.toString()));
+
+        if(existeSimbolo($1+cadParametros,yy.METODO)){
+            //-w-errorSemantico("El método "+$1+cadParametros+" ya ha sido declarado en "+ambitoActual.at(-1)+".",this._$.first_line,this._$.first_column);
+            errorSemantico("El método "+$1+cadParametros+" ya ha sido declarado.",this._$.first_line,this._$.first_column);
+        }
+        //-w-agregarSimbolo(ambitoActual.at(-1)+"_"+$1+cadParametros,"",ambitoActual.at(-1),"",yy.METODO);
+        agregarSimbolo($1+cadParametros,"","","",yy.METODO);
+        nuevoAmbito();
+
+        yy.PILA_INS.apilar(yy.nuevoMetodo($1+cadParametros));
+
+        //-w-ambitoActual.push(ambitoActual.at(-1)+"_"+$1+cadParametros);
+        ambitoClase = false;
+        cadParametros = "";
+        pushSimbolosParametros();
+    }
+    ;
+
+
+
 parametros : parametros_p
     | parametros_p COMA parametros
     ;
@@ -591,19 +705,6 @@ parametros_b_p : parametros
 
 //------------------------------------------------------------------------------------
 
-//INSTRUCCIONES PRINT Y PRINTLN ------------------------------------------------------
-
-instruccion_print : PR_PRINT PARENT_A expresion_multiple PARENT_C PUNTO_Y_COMA {
-
-    }
-    ;
-
-instruccion_println : PR_PRINTLN PARENT_A expresion_multiple PARENT_C PUNTO_Y_COMA {
-
-    }
-    ;
-
-//------------------------------------------------------------------------------------
 
 
 //PRODUCCION LLAVE INSTRUCCIONES LLAVE ----------------------------------------------
@@ -850,8 +951,9 @@ instruccion_break : PR_BREAK PUNTO_Y_COMA
 //-----------------------------------------------------------------------------------
 
 //EXPRESION MULTIPLE----------------------------------------------------------------
-expresion_multiple : a3 { $$ = $1; };
-
+expresion_multiple : a3 { $$ = $1; }
+      | /*Lambda*/
+;
 
 //---------------------A3---------------------
 a3 : b3 a3p {

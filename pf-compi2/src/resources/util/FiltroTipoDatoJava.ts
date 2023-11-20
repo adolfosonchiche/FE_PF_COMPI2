@@ -38,6 +38,14 @@ export class FiltroTipoDatoJava{
   public PUBLIC:string = "public";
   public PRIVATE:string = "private";
   public DEFAULT:string = "default";
+  public PRINT:string = "print";
+  public GETTER: string = "getter";
+  public SETTER: string = "setter";
+  public IMPORT: string = "import";
+  public NEW: string = "new";
+  public THIS: string = "this";
+  public RETURN: string = "return";
+  public OBJECT: string = "object";
 
   public filtrarOperacion(tipo1:String, tipo2:String, tipoOperacion:String):string | null{
       if(tipoOperacion==this.POTENCIA){

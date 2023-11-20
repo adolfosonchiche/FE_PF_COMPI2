@@ -15,6 +15,9 @@ import { Clase } from "src/model/instruccion/java/Clase";
 import { Metodo } from "src/model/instruccion/Metodo";
 import { Operacion } from "src/model/instruccion/Operacion";
 import { Break } from "src/model/instruccion/jumps/Break";
+import { Print } from "src/model/instruccion/Print";
+import { Return } from "src/model/instruccion/jumps/Return";
+import { Object } from "src/model/instruccion/Object";
 
 export class ControladorInstrucciones{
 
@@ -80,6 +83,18 @@ export class ControladorInstrucciones{
 
     public nuevaOperacion(opr1:Instruccion, opr2:Instruccion, opr:string, resultado:any):Operacion{
         return new Operacion(opr1,opr2,opr,resultado);
+    }
+
+    public nuevaPrint(opr1:string,opr2:Instruccion):Print{
+      return new Print(opr1,opr2);
+    }
+
+    public nuevaReturn(opr1:string,opr2:Instruccion):Return{
+      return new Return(opr1,opr2);
+    }
+
+    public nuevaObject(opr1:string,opr2:Instruccion):Object{
+      return new Object(opr1,opr2);
     }
 
 }
